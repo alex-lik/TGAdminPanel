@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  # === Панель управления и API FastAPI ===
+  # backend:
+  #   build: ./backend
+  #   container_name: tg_backend
+  #   working_dir: /app
+  #   environment:
+  #     - PYTHONPATH=/app
+  #   env_file: ./backend/.env
+  #   command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app
+  #   depends_on:
+  #     - db
+
+  # === Фронтенд (React/Vue/...) ===
+  frontend:
+    # build: ./frontend
+    build: .
+    container_name: tg_frontend
+    ports:
+      - "3000:80"
+    # depends_on:
+    #   - backend
+
+  # # === Отправщик: web (FastAPI API для очереди) ===
+  # publisher_web:
+  #   build: ./publisher  # <--- папка, где твой отправщик (main.py, celery_app.py и т.д.)
+  #   container_name: telegram_publish_web
+  #   working_dir: /app
+  #   environment:
+  #     - PYTHONPATH=/app
+  #   env_file: ./publisher/.env
+  #   command: uvicorn app.main:app --host 0.0.0.0 --port 8012 --reload
+  #   ports:
+  #     - "8012:8012"
+  #   volumes:
+  #     - ./publisher:/app
+  #   depends_on:
+  #     - publisher_redis
+
+  # # === Отправщик: Celery-воркер ===
+  # publisher_worker:
+  #   build: ./publisher
+  #   container_name: telegram_publish_worker
+  #   working_dir: /app
+  #   environment:
+  #     - PYTHONPATH=/app
+  #   env_file: ./publisher/.env
+  #   command: celery -A celery_app.celery worker --loglevel=info
+  #   volumes:
+  #     - ./publisher:/app
+  #   depends_on:
+  #     - publisher_redis
+
+  # # === Redis для очередей Celery (для отправщика) ===
+  # publisher_redis:
+  #   image: redis:7-alpine
+  #   container_name: telegram_publish_redis
+  #   ports:
+  #     - "6380:6379"
+
+  # # === Основная БД (Postgres) ===
+  # db:
+  #   image: postgres:16
+  #   container_name: tg_db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: telegram_content
+  #     POSTGRES_USER: user
+  #     POSTGRES_PASSWORD: pass
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+
+# volumes:
+#   db_data:
