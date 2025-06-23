@@ -39,3 +39,5 @@ class PostContent(Base):
     content = Column(Text, nullable=False)
     post = relationship("Post", back_populates="contents")
     channel = relationship("Channel", back_populates="post_contents")
+    message_id = Column(Integer, nullable=True)  # ID сообщения в отправщике
+    image_path = Column(String, nullable=True)
