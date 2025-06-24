@@ -7,12 +7,12 @@ services:
   tg_db:
     image: postgres:15
     environment:
-      POSTGRES_DB: tgmanager
-      POSTGRES_USER: tguser
-      POSTGRES_PASSWORD: tgpass
-      TZ: Europe/Kyiv
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - tg_pgdata:/var/lib/postgresql/data
 
@@ -22,7 +22,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
-      TZ: Europe/Kyiv
+      TZ: ${TZ}
     ports:
       - "5050:80"
     volumes:
@@ -38,8 +38,8 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
-      - TZ=Europe/Kyiv
-      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
+      - TZ=${TZ}
+      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
       - LOG_PATH=/app/app/app.log
     depends_on:
       - tg_db
@@ -54,8 +54,8 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
-      - TZ=Europe/Kyiv
-      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
+      - TZ=${TZ}
+      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
     depends_on:
       - tg_backend
       - tg_redis
@@ -67,8 +67,8 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
-      - TZ=Europe/Kyiv
-      - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
+      - TZ=${TZ}
+      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
     depends_on:
       - tg_backend
       - tg_redis
@@ -82,7 +82,7 @@ services:
              --broker=redis://tg_redis:6379/0
              flower
     environment:
-      - TZ=Europe/Kyiv
+      - TZ=${TZ}
       - FLOWER_PORT=5555
       - FLOWER_BASIC_AUTH=admin:admin
     ports:
