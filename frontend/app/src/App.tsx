@@ -31,7 +31,7 @@ interface Post {
   contents: PostContent[]; // массив: { channel_id, content }
 }
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "http://localhost:8015";
 
 export default function TelegramContentManager() {
   // State
