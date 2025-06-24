@@ -15,6 +15,20 @@ services:
     volumes:
       - tg_pgdata:/var/lib/postgresql/data
 
+  tg_pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - tg_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - tg_db
+
+
   tg_backend:
     build:
       context: ./backend
@@ -84,5 +98,9 @@ services:
     depends_on:
       - tg_backend
 
+
+
+
 volumes:
   tg_pgdata:
+  tg_pgadmin_data:
