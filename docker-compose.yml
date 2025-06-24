@@ -11,9 +11,10 @@ services:
       POSTGRES_USER: tguser
       POSTGRES_PASSWORD: tgpass
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - tg_pgdata:/var/lib/postgresql/data
+    TZ: Europe/Kyiv
 
   tg_pgadmin:
     image: dpage/pgadmin4
@@ -27,6 +28,7 @@ services:
       - tg_pgadmin_data:/var/lib/pgadmin
     depends_on:
       - tg_db
+    TZ: Europe/Kyiv
 
 
   tg_backend:
@@ -43,6 +45,7 @@ services:
       - tg_redis
     ports:
       - "8015:8015"
+    TZ: Europe/Kyiv
 
   tg_celery_worker:
     build:
@@ -55,6 +58,7 @@ services:
     depends_on:
       - tg_backend
       - tg_redis
+    TZ: Europe/Kyiv
 
   tg_celery_beat:
     build:
@@ -67,6 +71,7 @@ services:
     depends_on:
       - tg_backend
       - tg_redis
+    TZ: Europe/Kyiv
 
   tg_flower:
     build:
@@ -85,6 +90,7 @@ services:
       - tg_redis
     volumes:
       - ./backend/app:/app/app
+    TZ: Europe/Kyiv
 
   frontend:
     build:
@@ -97,6 +103,7 @@ services:
       - "5173:80"
     depends_on:
       - tg_backend
+    TZ: Europe/Kyiv
 
 
 
