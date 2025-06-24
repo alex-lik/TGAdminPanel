@@ -32,3 +32,5 @@ httpx
 celery[redis] 
 flower
 anyio
+psycopg2-binary 
+python-dotenv
