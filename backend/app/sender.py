@@ -1,7 +1,9 @@
 import httpx
+import anyio
+
 publisher_url: str = "http://10.0.15.4:8012/publish"
 
-async def send_to_publisher(
+async def send_to_publisher_async(
     token: str,
     chat_id: str,
     parse_mode: str,
@@ -9,9 +11,6 @@ async def send_to_publisher(
     caption: str = None,
     image_path: str = None,
 ) -> int:
-    """
-    Отправляет данные на сервис-отправщик и возвращает message_id.
-    """
     data = {
         "token": token,
         "chat_id": chat_id,
@@ -27,9 +26,6 @@ async def send_to_publisher(
         response.raise_for_status()
         return response.json()["message_id"]
 
-
-async def get_message_status(publisher_url: str, message_id: int):
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"{publisher_url}/status/{message_id}")
-        r.raise_for_status()
-        return r.json()
+def send_to_publisher(*args, **kwargs):
+    # Синхронная обёртка для вызова из Celery (используется anyio)
+    return anyio.run(send_to_publisher_async, *args, **kwargs)
