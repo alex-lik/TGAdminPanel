@@ -10,11 +10,11 @@ services:
       POSTGRES_DB: tgmanager
       POSTGRES_USER: tguser
       POSTGRES_PASSWORD: tgpass
+      TZ: Europe/Kyiv
     ports:
       - "5433:5432"
     volumes:
       - tg_pgdata:/var/lib/postgresql/data
-    TZ: Europe/Kyiv
 
   tg_pgadmin:
     image: dpage/pgadmin4
@@ -22,13 +22,13 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
+      TZ: Europe/Kyiv
     ports:
       - "5050:80"
     volumes:
       - tg_pgadmin_data:/var/lib/pgadmin
     depends_on:
       - tg_db
-    TZ: Europe/Kyiv
 
 
   tg_backend:
@@ -38,6 +38,7 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
+      - TZ=Europe/Kyiv
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
       - LOG_PATH=/app/app/app.log
     depends_on:
@@ -45,7 +46,6 @@ services:
       - tg_redis
     ports:
       - "8015:8015"
-    TZ: Europe/Kyiv
 
   tg_celery_worker:
     build:
@@ -54,11 +54,11 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
+      - TZ=Europe/Kyiv
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
     depends_on:
       - tg_backend
       - tg_redis
-    TZ: Europe/Kyiv
 
   tg_celery_beat:
     build:
@@ -67,11 +67,11 @@ services:
     volumes:
       - ./backend/app:/app/app
     environment:
+      - TZ=Europe/Kyiv
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@tg_db:5432/tgmanager
     depends_on:
       - tg_backend
       - tg_redis
-    TZ: Europe/Kyiv
 
   tg_flower:
     build:
@@ -82,6 +82,7 @@ services:
              --broker=redis://tg_redis:6379/0
              flower
     environment:
+      - TZ=Europe/Kyiv
       - FLOWER_PORT=5555
       - FLOWER_BASIC_AUTH=admin:admin
     ports:
@@ -90,7 +91,6 @@ services:
       - tg_redis
     volumes:
       - ./backend/app:/app/app
-    TZ: Europe/Kyiv
 
   frontend:
     build:
@@ -103,7 +103,6 @@ services:
       - "5173:80"
     depends_on:
       - tg_backend
-    TZ: Europe/Kyiv
 
 
 
