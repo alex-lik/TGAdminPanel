@@ -31,8 +31,8 @@ interface Post {
   contents: PostContent[]; // массив: { channel_id, content }
 }
 
-const API_BASE_URL = "http://localhost:8015";
-
+// const API_BASE_URL = "http://localhost:8015";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8015";
 export default function TelegramContentManager() {
   // State
   const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
