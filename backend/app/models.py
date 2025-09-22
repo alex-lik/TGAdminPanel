@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship
-from database import Base
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from database import Base
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+
 
 class ChannelGroup(Base):
     __tablename__ = "channel_groups"
@@ -27,7 +30,7 @@ class Post(Base):
     group_id = Column(Integer, ForeignKey("channel_groups.id"))
     publish_time = Column(DateTime, nullable=False)
     status = Column(String, default="scheduled")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(ZoneInfo("Europe/Kyiv")))
     group = relationship("ChannelGroup", back_populates="posts")
     contents = relationship("PostContent", back_populates="post", cascade="all, delete-orphan")
 
@@ -39,5 +42,7 @@ class PostContent(Base):
     content = Column(Text, nullable=False)
     post = relationship("Post", back_populates="contents")
     channel = relationship("Channel", back_populates="post_contents")
+    message_id = Column(Integer, nullable=True)  # ID сообщения в отправщике
+    image_path = Column(String, nullable=True)
     message_id = Column(Integer, nullable=True)  # ID сообщения в отправщике
     image_path = Column(String, nullable=True)

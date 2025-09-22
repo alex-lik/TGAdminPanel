@@ -153,6 +153,8 @@ bash
 Редактировать
 docker-compose build --no-cache frontend
 docker-compose up frontend
+При сборке используется переменная окружения `VITE_API_BASE_URL`. Значение
+задаётся в файле `.env` и пробрасывается через `docker-compose`.
 Итого
 Используй @tailwindcss/postcss с Tailwind 4.x и PostCSS!
 

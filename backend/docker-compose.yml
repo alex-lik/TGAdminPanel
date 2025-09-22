@@ -1,12 +1,21 @@
 version: '3.8'
 
 services:
+<<<<<<< HEAD
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
 
   db:
+=======
+  tg_redis:
+    image: redis:7-alpine
+    # ports:
+    #   - "6380:6379"
+
+  tg_db:
+>>>>>>> abd87a6c29e9f56783cac546c133769c128e472a
     image: postgres:15
     environment:
       POSTGRES_DB: tgmanager
@@ -15,23 +24,40 @@ services:
     ports:
       - "5432:5432"
     volumes:
+<<<<<<< HEAD
       - pgdata:/var/lib/postgresql/data
 
   backend:
     build: .
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+=======
+      - tg_pgdata:/var/lib/postgresql/data
+
+  tg_backend:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8015 --reload
+>>>>>>> abd87a6c29e9f56783cac546c133769c128e472a
     volumes:
       - ./app:/app/app
     environment:
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@db:5432/tgmanager
       - LOG_PATH=/app/app/app.log
     depends_on:
+<<<<<<< HEAD
       - db
       - redis
     ports:
       - "8000:8000"
 
   celery_worker:
+=======
+      - tg_db
+      - tg_redis
+    ports:
+      - "8015:8015"
+
+  tg_celery_worker:
+>>>>>>> abd87a6c29e9f56783cac546c133769c128e472a
     build: .
     command: celery -A app.celery_app.celery worker --loglevel=info
     volumes:
@@ -39,10 +65,17 @@ services:
     environment:
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@db:5432/tgmanager
     depends_on:
+<<<<<<< HEAD
       - backend
       - redis
 
   celery_beat:
+=======
+      - tg_backend
+      - tg_redis
+
+  tg_celery_beat:
+>>>>>>> abd87a6c29e9f56783cac546c133769c128e472a
     build: .
     command: celery -A app.celery_app.celery beat --loglevel=info
     volumes:
@@ -50,6 +83,7 @@ services:
     environment:
       - SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://tguser:tgpass@db:5432/tgmanager
     depends_on:
+<<<<<<< HEAD
       - backend
       - redis
 
@@ -65,3 +99,27 @@ services:
 
 volumes:
   pgdata:
+=======
+      - tg_backend
+      - tg_redis
+
+  tg_flower:
+    build: .
+    working_dir: /app            # <-- гарантируем, что мы именно в /app
+    command: >
+      celery --app=app.celery_app.celery
+            --broker=redis://tg_redis:6379/0
+            flower
+    environment:
+      - FLOWER_PORT=5555         # задаём порт через переменную окружения
+      - FLOWER_BASIC_AUTH=admin:admin
+    ports:
+      - "5555:5555"
+    depends_on:
+      - tg_redis
+    volumes:                     # (опционально) live-mount исходников для горячего обновления
+      - ./app:/app/app
+
+volumes:
+  tg_pgdata:
+>>>>>>> abd87a6c29e9f56783cac546c133769c128e472a
