@@ -1,29 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from schemas import PostCreate, PostResponse
 from database import get_db
 import crud
-from publisher import publish_post
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.date import DateTrigger
-from datetime import datetime, UTC
+from tasks import publish_post_task
 
 router = APIRouter()
-scheduler = AsyncIOScheduler()
-scheduler.start()
 
 @router.post("/", response_model=PostResponse)
-def create_post(post: PostCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def create_post(post: PostCreate, db: Session = Depends(get_db)):
+    print(post)
     db_post = crud.create_post(db, post)
     if post.publish_now:
-        background_tasks.add_task(publish_post, db_post.id)
-    else:
-        scheduler.add_job(
-            publish_post,
-            DateTrigger(run_date=post.publish_time),
-            args=[db_post.id],
-            id=f"post_{db_post.id}"
-        )
+        publish_post_task.delay(db_post.id)  # немедленная публикация через очередь Celery
+    # если post.publish_now == False — публикацией займётся Celery Beat через schedule_published_posts
     return db_post
 
 @router.get("/", response_model=list[PostResponse])
