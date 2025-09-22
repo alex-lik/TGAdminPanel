@@ -1,0 +1,32 @@
+version: "3.8"
+
+
+services:
+  # === Отправщик: web (FastAPI API для очереди) ===
+
+
+
+  # === Панель управления и API FastAPI ===
+  tg_publisher_backend:
+    build: ./planer/backend
+    container_name: tg_publisher_backend
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+    # env_file: ./backend/.env
+    command: uvicorn main:app --host 0.0.0.0 --port 8013 --reload
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./planer/backend:/app
+
+
+
+ # === Фронтенд (React/Vue/...) ===
+  tg_publisher_frontend:
+    build: ./planer/frontend
+    container_name: tg_publisher_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
