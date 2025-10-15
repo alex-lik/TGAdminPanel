@@ -1,281 +1,167 @@
-# API Documentation for TGAdminPanel
+# Документация API TGAdminPanel
+__________________________________________________________________________________________________________________________________________________
 
-## Overview
+## Обзор
 
-TGAdminPanel provides a REST API for managing Telegram channel content. The API allows you to create channel groups, add channels, and schedule posts for publication.
+TGAdminPanel предоставляет REST API для управления контентом Telegram-каналов. API позволяет создавать группы каналов, добавлять каналы и планировать публикацию постов.
 
-Base URL: `http://localhost:8000` (default for backend)
+Базовый URL: `http://localhost:8000/api` (с префиксом /api)
+__________________________________________________________________________________________________________________________________________________
 
-## Authentication
+## Аутентификация
 
-Currently, the API does not require authentication. All endpoints are open.
+API защищен Basic Authentication. Все запросы должны содержать заголовок Authorization.
 
-## Endpoints
+Пример заголовка:
+```
+Authorization: Basic dXNlcjpwYXNzd29yZA==
+```
 
-### Channel Groups
+Где `dXNlcjpwYXNzd29yZA==` - это base64-кодированная строка `username:password`.
+__________________________________________________________________________________________________________________________________________________
 
-#### GET /channel-groups/
-Get all channel groups.
+## Группы каналов
 
-**Response:**
+### Получить все группы каналов
+
+**Эндпоинт:** `GET /api/channel-groups/`
+**Описание:** Возвращает список всех групп каналов с их каналами
+
+**Пример curl:**
+```bash
+curl -X GET "http://localhost:8000/api/channel-groups/" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
+```
+
+**Ответ:**
 ```json
 [
   {
     "id": 1,
-    "name": "Main Channels",
+    "name": "Python Hacks",
     "channels": [
       {
         "id": 1,
-        "name": "Channel 1",
-        "channel_id": "@channel1",
+        "name": "py hack ru",
+        "channel_id": "1002825801123ru",
         "bot_token": "123456:ABC...",
-        "language": "en"
+        "language": "ru"
       }
     ]
   }
 ]
 ```
 
-**Examples:**
+
+__________________________________________________________________________________________________________________________________________________
+
+### Создать группу каналов
+
+**Эндпоинт:** `POST /api/channel-groups/`
+**Описание:** Создает новую группу каналов
+
+**Пример curl:**
 ```bash
-curl -X GET "http://localhost:8000/channel-groups/"
+curl -X POST "http://localhost:8000/api/channel-groups/" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA==" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Новая группа"}'
 ```
 
-```python
-import requests
-
-response = requests.get("http://localhost:8000/channel-groups/")
-groups = response.json()
-```
-
-```javascript
-fetch('http://localhost:8000/channel-groups/')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-#### POST /channel-groups/
-Create a new channel group.
-
-**Request Body:**
-```json
-{
-  "name": "New Group"
-}
-```
-
-**Response:**
+**Ответ:**
 ```json
 {
   "id": 2,
-  "name": "New Group",
+  "name": "Новая группа",
   "channels": []
 }
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
+### Получить группу каналов по ID
+
+**Эндпоинт:** `GET /api/channel-groups/{group_id}`
+**Описание:** Возвращает конкретную группу каналов
+
+**Пример curl:**
 ```bash
-curl -X POST "http://localhost:8000/channel-groups/" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "New Group"}'
+curl -X GET "http://localhost:8000/api/channel-groups/1" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```python
-import requests
+### Удалить группу каналов
 
-data = {"name": "New Group"}
-response = requests.post("http://localhost:8000/channel-groups/", json=data)
-group = response.json()
-```
+**Эндпоинт:** `DELETE /api/channel-groups/{group_id}`
+**Описание:** Удаляет группу каналов и все ее каналы
 
-```javascript
-fetch('http://localhost:8000/channel-groups/', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ name: 'New Group' })
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-#### GET /channel-groups/{group_id}
-Get a specific channel group by ID.
-
-**Parameters:**
-- `group_id` (integer): The ID of the channel group
-
-**Response:**
-```json
-{
-  "id": 1,
-  "name": "Main Channels",
-  "channels": [...]
-}
-```
-
-**Examples:**
+**Пример curl:**
 ```bash
-curl -X GET "http://localhost:8000/channel-groups/1"
+curl -X DELETE "http://localhost:8000/api/channel-groups/1" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```python
-import requests
-
-response = requests.get("http://localhost:8000/channel-groups/1")
-group = response.json()
-```
-
-```javascript
-fetch('http://localhost:8000/channel-groups/1')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-#### DELETE /channel-groups/{group_id}
-Delete a channel group and all its channels.
-
-**Parameters:**
-- `group_id` (integer): The ID of the channel group to delete
-
-**Response:**
+**Ответ:**
 ```json
 {
   "message": "Channel group deleted"
 }
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
+## Каналы
+
+### Добавить канал в группу
+
+**Эндпоинт:** `POST /api/channel-groups/{group_id}/channels/`
+**Описание:** Добавляет канал в указанную группу
+
+**Пример curl:**
 ```bash
-curl -X DELETE "http://localhost:8000/channel-groups/1"
-```
-
-```python
-import requests
-
-response = requests.delete("http://localhost:8000/channel-groups/1")
-print(response.json())
-```
-
-```javascript
-fetch('http://localhost:8000/channel-groups/1', {
-  method: 'DELETE'
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-### Channels
-
-#### POST /channel-groups/{group_id}/channels/
-Add a channel to a specific group.
-
-**Parameters:**
-- `group_id` (integer): The ID of the channel group
-
-**Request Body:**
-```json
-{
-  "name": "My Channel",
-  "channel_id": "@mychannel",
-  "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-  "language": "en"
-}
-```
-
-**Response:**
-```json
-{
-  "id": 1,
-  "name": "My Channel",
-  "channel_id": "@mychannel",
-  "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-  "language": "en"
-}
-```
-
-**Examples:**
-```bash
-curl -X POST "http://localhost:8000/channel-groups/1/channels/" \
+curl -X POST "http://localhost:8000/api/channel-groups/1/channels/" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA==" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "My Channel",
-    "channel_id": "@mychannel",
+    "name": "py hack ua",
+    "channel_id": "1002531660864ua",
     "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-    "language": "en"
+    "language": "ua"
   }'
 ```
+__________________________________________________________________________________________________________________________________________________
 
-```python
-import requests
+### Удалить канал
 
-data = {
-    "name": "My Channel",
-    "channel_id": "@mychannel",
-    "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-    "language": "en"
-}
-response = requests.post("http://localhost:8000/channel-groups/1/channels/", json=data)
-channel = response.json()
+**Эндпоинт:** `DELETE /api/channels/{channel_id}`
+**Описание:** Удаляет канал по его ID
+
+**Пример curl:**
+```bash
+curl -X DELETE "http://localhost:8000/api/channels/1" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```javascript
-fetch('http://localhost:8000/channel-groups/1/channels/', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    name: 'My Channel',
-    channel_id: '@mychannel',
-    bot_token: '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-    language: 'en'
-  })
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-#### DELETE /channels/{channel_id}
-Delete a channel.
-
-**Parameters:**
-- `channel_id` (integer): The ID of the channel to delete
-
-**Response:**
+**Ответ:**
 ```json
 {
   "message": "Channel deleted"
 }
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
+## Посты
+
+### Получить все посты
+
+**Эндпоинт:** `GET /api/posts/`
+**Описание:** Возвращает список всех постов
+
+**Пример curl:**
 ```bash
-curl -X DELETE "http://localhost:8000/channels/1"
+curl -X GET "http://localhost:8000/api/posts/" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```python
-import requests
-
-response = requests.delete("http://localhost:8000/channels/1")
-print(response.json())
-```
-
-```javascript
-fetch('http://localhost:8000/channels/1', {
-  method: 'DELETE'
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-### Posts
-
-#### GET /posts/
-Get all posts.
-
-**Response:**
+**Ответ:**
 ```json
 [
   {
@@ -288,249 +174,134 @@ Get all posts.
       {
         "id": 1,
         "channel_id": 1,
-        "content": "Hello World!"
+        "content": "Привет мир!"
       }
     ]
   }
 ]
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
+### Создать пост
+
+**Эндпоинт:** `POST /api/posts/`
+**Описание:** Создает новый пост для публикации
+
+**Пример curl:**
 ```bash
-curl -X GET "http://localhost:8000/posts/"
-```
-
-```python
-import requests
-
-response = requests.get("http://localhost:8000/posts/")
-posts = response.json()
-```
-
-```javascript
-fetch('http://localhost:8000/posts/')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-#### POST /posts/
-Create a new post.
-
-**Request Body:**
-```json
-{
-  "group_id": 1,
-  "publish_time": "2023-10-13T12:00:00",
-  "publish_now": false,
-  "contents": [
-    {
-      "channel_id": 1,
-      "content": "Hello from channel 1!"
-    },
-    {
-      "channel_id": 2,
-      "content": "Hello from channel 2!"
-    }
-  ]
-}
-```
-
-**Response:**
-```json
-{
-  "id": 2,
-  "group_id": 1,
-  "publish_time": "2023-10-13T12:00:00",
-  "status": "scheduled",
-  "created_at": "2023-10-13T10:00:00",
-  "contents": [
-    {
-      "id": 3,
-      "channel_id": 1,
-      "content": "Hello from channel 1!"
-    },
-    {
-      "id": 4,
-      "channel_id": 2,
-      "content": "Hello from channel 2!"
-    }
-  ]
-}
-```
-
-**Examples:**
-```bash
-curl -X POST "http://localhost:8000/posts/" \
+curl -X POST "http://localhost:8000/api/posts/" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA==" \
   -H "Content-Type: application/json" \
   -d '{
     "group_id": 1,
-    "publish_time": "2023-10-13T12:00:00",
+    "publish_time": "2023-10-14T10:00:00",
     "publish_now": false,
     "contents": [
       {
-        "channel_id": 1,
-        "content": "Hello from channel 1!"
+        "channel_id": 2,
+        "content": "Пост для py hack ua"
       }
     ]
   }'
 ```
 
-```python
-import requests
-
-data = {
-    "group_id": 1,
-    "publish_time": "2023-10-13T12:00:00",
-    "publish_now": False,
-    "contents": [
-        {
-            "channel_id": 1,
-            "content": "Hello from channel 1!"
-        }
-    ]
-}
-response = requests.post("http://localhost:8000/posts/", json=data)
-post = response.json()
-```
-
-```javascript
-fetch('http://localhost:8000/posts/', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    group_id: 1,
-    publish_time: '2023-10-13T12:00:00',
-    publish_now: false,
-    contents: [
-      {
-        channel_id: 1,
-        content: 'Hello from channel 1!'
-      }
-    ]
-  })
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-#### GET /posts/{post_id}
-Get a specific post by ID.
-
-**Parameters:**
-- `post_id` (integer): The ID of the post
-
-**Response:**
+**Ответ:**
 ```json
 {
-  "id": 1,
+  "id": 2,
   "group_id": 1,
-  "publish_time": "2023-10-13T12:00:00",
-  "status": "published",
+  "publish_time": "2023-10-14T10:00:00",
+  "status": "scheduled",
   "created_at": "2023-10-13T10:00:00",
-  "contents": [...]
+  "contents": [
+    {
+      "id": 3,
+      "channel_id": 2,
+      "content": "Пост для py hack ua"
+    }
+  ]
 }
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
+### Получить пост по ID
+
+**Эндпоинт:** `GET /api/posts/{post_id}`
+**Описание:** Возвращает конкретный пост
+
+**Пример curl:**
 ```bash
-curl -X GET "http://localhost:8000/posts/1"
+curl -X GET "http://localhost:8000/api/posts/1" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```python
-import requests
+### Удалить пост
 
-response = requests.get("http://localhost:8000/posts/1")
-post = response.json()
+**Эндпоинт:** `DELETE /api/posts/{post_id}`
+**Описание:** Удаляет пост по его ID
+
+**Пример curl:**
+```bash
+curl -X DELETE "http://localhost:8000/api/posts/1" \
+  -H "Authorization: Basic dXNlcjpwYXNzd29yZA=="
 ```
 
-```javascript
-fetch('http://localhost:8000/posts/1')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-#### DELETE /posts/{post_id}
-Delete a post.
-
-**Parameters:**
-- `post_id` (integer): The ID of the post to delete
-
-**Response:**
+**Ответ:**
 ```json
 {
   "message": "Post deleted"
 }
 ```
+__________________________________________________________________________________________________________________________________________________
 
-**Examples:**
-```bash
-curl -X DELETE "http://localhost:8000/posts/1"
-```
-
-```python
-import requests
-
-response = requests.delete("http://localhost:8000/posts/1")
-print(response.json())
-```
-
-```javascript
-fetch('http://localhost:8000/posts/1', {
-  method: 'DELETE'
-})
-.then(response => response.json())
-.then(data => console.log(data));
-```
-
-## Data Models
+## Модели данных
 
 ### ChannelGroup
-- `id` (integer): Unique identifier
-- `name` (string): Group name
-- `channels` (array): List of channels in the group
+- `id` (integer): Уникальный идентификатор
+- `name` (string): Название группы
+- `channels` (array): Список каналов в группе
 
 ### Channel
-- `id` (integer): Unique identifier
-- `name` (string): Channel name
-- `channel_id` (string): Telegram channel ID (e.g., "@mychannel")
-- `bot_token` (string): Telegram bot token
-- `language` (string, optional): Channel language
+- `id` (integer): Уникальный идентификатор
+- `name` (string): Название канала
+- `channel_id` (string): ID канала в Telegram (например, "1002531660864ua")
+- `bot_token` (string): Токен Telegram бота
+- `language` (string, опционально): Язык канала
 
 ### Post
-- `id` (integer): Unique identifier
-- `group_id` (integer): ID of the channel group
-- `publish_time` (datetime): Scheduled publication time
-- `status` (string): Post status ("scheduled", "published", "failed")
-- `created_at` (datetime): Creation timestamp
-- `contents` (array): List of post contents for different channels
+- `id` (integer): Уникальный идентификатор
+- `group_id` (integer): ID группы каналов
+- `publish_time` (datetime): Время публикации
+- `status` (string): Статус ("scheduled", "published", "failed")
+- `created_at` (datetime): Время создания
+- `contents` (array): Список контента для разных каналов
 
 ### PostContent
-- `id` (integer): Unique identifier
-- `channel_id` (integer): ID of the target channel
-- `content` (string): Text content for the post
-- `message_id` (integer, optional): Telegram message ID after publication
-- `image_path` (string, optional): Path to image file
+- `id` (integer): Уникальный идентификатор
+- `channel_id` (integer): ID целевого канала
+- `content` (string): Текстовый контент поста
+- `message_id` (integer, опционально): ID сообщения в Telegram после публикации
+- `image_path` (string, опционально): Путь к файлу изображения
 
-## Error Handling
+## Обработка ошибок
 
-The API returns standard HTTP status codes:
-- `200`: Success
-- `404`: Resource not found
-- `422`: Validation error
-- `500`: Internal server error
+API возвращает стандартные HTTP коды статусов:
+- `200`: Успех
+- `401`: Неавторизован
+- `404`: Ресурс не найден
+- `422`: Ошибка валидации
+- `500`: Внутренняя ошибка сервера
 
-Error responses include a JSON object with an error message:
+Ответы с ошибками содержат JSON объект с сообщением об ошибке:
 ```json
 {
-  "detail": "Error message"
+  "detail": "Сообщение об ошибке"
 }
 ```
 
-## Notes
+## Примечания
 
-- All datetime fields are in ISO 8601 format
-- The `publish_now` flag in post creation immediately triggers publication via Celery
-- Posts with `publish_now: false` are scheduled for future publication
-- Image support is planned but not fully implemented in the current version
+- Все поля datetime в формате ISO 8601
+- Флаг `publish_now` в создании поста немедленно запускает публикацию через Celery
+- Посты с `publish_now: false` планируются для будущей публикации
+- Поддержка изображений запланирована, но не полностью реализована в текущей версии
