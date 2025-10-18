@@ -22,9 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(groups.router, prefix="/channel-groups", tags=["Channel Groups"])
-app.include_router(channels.router, prefix="/channel-groups", tags=["Channels"])
-app.include_router(posts.router, prefix="/posts", tags=["Posts"])
+app.include_router(groups.router, prefix="/api/channel-groups", tags=["Channel Groups"])
+app.include_router(channels.router, prefix="/api/channel-groups", tags=["Channels"])
+app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
 
 @app.get("/")
 def root():

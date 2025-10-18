@@ -1,8 +1,9 @@
 import httpx
 import anyio
+from os import getenv
 # import requests
 
-publisher_url: str = "http://10.0.15.4:8012/publish"
+publisher_url: str = getenv("PUBLISHER_URL", "http://localhost:8012/publish")
 
 async def send_to_publisher_async(token: str, chat_id: str, parse_mode: str, text: str = None, 
                                   caption: str = None, image_path: str = None) -> int:
