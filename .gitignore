@@ -181,3 +181,39 @@ cython_debug/
 .cursorindexingignore
 frontend/telegram-content-manager/
 backend/telegram_content.db
+# --- Project: TGAdminPanel ---
+# Local DBs anywhere in the tree (the tracked backend/app/telegram_content.db
+# must stay out of git — see commit removing it from index)
+*.db
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.db-journal
+**/telegram_content.db
+# Telegram sessions / auth artifacts
+*.session
+*.session-journal
+# Secrets / local config (never commit real values)
+.env.local
+!.env.example
+**/.env
+!**/.env.example
+# Runtime / downloads
+logs/
+*.log
+web_downloads/
+clone_cache/
+verify_cache/
+# Frontend
+node_modules/
+dist/
+*.local
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+# Agents / tooling
+.opencode/
